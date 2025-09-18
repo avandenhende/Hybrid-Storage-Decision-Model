@@ -1,0 +1,57 @@
+Metadata-Version: 2.1
+Name: hsds
+Version: 0.9.2
+Summary: Rest-based Web Service for HDF data
+Author-email: John Readey <jreadey@hdfgroup.org>
+Maintainer-email: John Readey <jreadey@hdfgroup.org>
+License: Apache Software License
+Project-URL: Homepage, https://www.hdfgroup.org/solutions/highly-scalable-data-service-hsds/
+Project-URL: Source, https://github.com/HDFGroup/hsds
+Project-URL: Documentation, https://github.com/HDFGroup/hsds/tree/master/docs
+Project-URL: Release notes, https://github.com/HDFGroup/hsds/releases/tag/v0.8.0
+Project-URL: Discussion forum, https://forum.hdfgroup.org/c/hsds/
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: Unix
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Database
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+Requires-Dist: aiohttp==3.9.4
+Requires-Dist: aiobotocore==2.13.0
+Requires-Dist: aiohttp_cors
+Requires-Dist: aiofiles
+Requires-Dist: azure-storage-blob
+Requires-Dist: bitshuffle>=0.5.2
+Requires-Dist: cryptography
+Requires-Dist: h5py>=3.6.0
+Requires-Dist: importlib_resources
+Requires-Dist: numcodecs
+Requires-Dist: numpy>=2.0.0rc1; python_version >= "3.9"
+Requires-Dist: psutil
+Requires-Dist: pyjwt
+Requires-Dist: pytz
+Requires-Dist: pyyaml
+Requires-Dist: requests<=2.31.0
+Requires-Dist: requests-unixsocket
+Requires-Dist: simplejson
+Requires-Dist: s3fs
+Requires-Dist: urllib3<2.0.0
+Provides-Extra: azure
+
+HSDS is a web service that implements a REST-based web service for HDF5 data stores.
+Data can be stored in either a POSIX files system, or using object-based storage such as
+AWS S3, Azure Blob Storage, or [MinIO](https://min.io).
+HSDS can be run a single machine or on a cluster using Kubernetes (or AKS on Microsoft Azure).
+
+In addition, HSDS can b  e run in serverless mode with AWS Lambda or h5pyd local mode.

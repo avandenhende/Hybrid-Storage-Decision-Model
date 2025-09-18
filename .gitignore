@@ -1,0 +1,12 @@
+.venv/
+
+build/
+dist/
+
+data_collection/
+
+.env
+
+hs.log
+
+requirements.txt

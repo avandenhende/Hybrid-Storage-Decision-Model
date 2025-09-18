@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capacity Expansion Model</title>
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet" />
+</head>
+<body>
+    <!--<div class="back_forward_container">
+        <button class="back_button" onclick="history.back()"> &lt; </button>
+        <button class="forward_button" onclick="history.forward()"> &gt; </button>
+    </div>-->
+    <div class="center">
+        <br>
+        <div id="status-message">Starting up...</div>
+        <div id="progress-container">
+            <div id="progress-bar">0%</div>
+        </div>
+    </div>
+    <br><br><br>
+
+<!-- Query output page -->
+<script>
+    async function query_output() {
+        const res = await fetch('/query_output');
+        const data = await res.json();
+
+        const {progress, message, complete} = data;
+        const adjusted_progress = 5 + progress * (0.95)
+
+        const progressBar = document.getElementById('progress-bar')
+        progressBar.style.width = `${adjusted_progress}%`;
+        progressBar.textContent = `${Math.round(progress)}%`;
+
+        const statusMessage = document.getElementById('status-message');
+        statusMessage.textContent = message || "Working...";
+
+        if (complete) {
+            window.location.href = '/output'
+        } else {
+            setTimeout(query_output, 1000)
+        }
+    }
+
+    setTimeout(query_output, 1000)
+</script>
+</body>
+</html>

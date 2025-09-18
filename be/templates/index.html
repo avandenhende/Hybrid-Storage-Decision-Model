@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capacity Expansion Model</title>
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet" />
+</head>
+<body>
+    <!-- Input form -->
+    <div id="content" class="center">
+        <br>
+        <h1>Decision Model</h1>
+        <form action="/data-initiation" method="POST" enctype="multipart/form-data" class="input_form" novalidate>
+            <!-- Input initation data CSV input -->
+            <button type="button" class="collapsible">Data Initiation</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Data Initiation</h4>
+                        <p>User input parameters (excluding demand data) can be tedious to re-enter between application uses. Download the data initiation template to store and upload user input paramenters.</p>
+                        <p>Only a CSV of the given template will be accepted, please download the template for more details.</p>
+                    </div>
+                </div>
+                <label id="upload_data_label" for="upload_data_file">
+                    Upload Data Initation CSV
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><a id="download_template" href="/static/upload_template.csv" download> Download Data Initiation Template </a>
+                <br>
+                <input id="upload_data_input" type="file" name="upload_data_file" accept=".csv" required>
+                <br><br>
+                <input id="submit" type="submit" value="Submit">
+            </div>
+        </form>
+        <form action="/loading" method="POST" enctype="multipart/form-data" class="input_form" novalidate>
+            <!-- Coordinate inputs -->
+            <button type="button" class="collapsible" id="solar_data_collapsible">Solar Resource Data</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Latitude</h4>
+                        <p>Provide the latitude of your planned solar installation. For now, this value must be between -21.2 and 60 degrees. This model utilizes NREL's NSRDB historical weather data to inform a PVWatts V8 model and calculate location specific solar availability.</p>
+                    </div>
+                </div>
+                <label for="lat">
+                    Latitude:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="lat" id="lat" placeholder="Latitude" value="{{ lat }}" pattern="^ *- ?21(\.20*)? *| *- ?21(\.([0-1]\d*)?)? *| *- ?20(\.\d*)? *| *- ?[0-1]?[0-9](\.\d*)? *| *[0-5]?[0-9](\.\d*)? *| *60(\.0*)? *$"/><!--"^-?\d*(\.\d*)?$" required/>-->
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Longitude</h4>
+                        <p>Provide the longitude of your planned solar installation. For now, this value must be between -180 and -22.5 degrees. This model utilizes NREL's NSRDB historical weather data to inform a PVWatts V8 model and calculate location specific solar availability.</p>
+                    </div>
+                </div>
+                <label for="lon">
+                    Longitude:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="lon" id="lon" placeholder="Longitude" value="{{ lon }}" pattern="^ *- ?180(\.0*)? *| *- ?1[0-7][0-9](\.\d*)? *| *- ?[3-9][0-9](\.\d*)? *| *- ?2[3-9](\.\d*)? *| *- ?22(\.[5-9](\d*)?) *$"/><!--"^-?\d*(\.\d*)?$" required/>-->
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Weather Severity</h4>
+                        <p>Determines the severity of input weather conditions. All weather conditions are based on full year historical data, and sorted based on severity.</p>
+                    </div>
+                </div>
+                <label for="weatherseverity" style="vertical-align: top;">
+                    Weather Severity:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><div class="weatherseveritycontainer">
+                    <input class="weatherseverityinput" type="range" name="weatherseverity" id="weatherseverity" value="{{ weatherseverity }}" min="0" max="22" required/><!--
+                    --><output class="weatherseverityoutput" id="weatherseverityvalue"></output>
+                </div>
+            </div>
+
+            <!-- Demand data CSV input -->
+            <button type="button" class="collapsible" id="demand_data_collapsible">Demand Data</button>
+            <div class="collapsed">
+                <a class="demand_route" href="/demand">Download Location Specific Demand Profiles</a>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Demand</h4>
+                        <p>Demand data must be uploaded as hourly demand in kiloWatts AC over the period of a year. Please upload a CSV with only the hourly demand data; this data should have 8760 numerical entries, one for each hour of the year.</p>
+                    </div>
+                </div>
+                <label id="demand_data_label" for="demand_data_file">
+                    Data must be uploaded as hourly demand [kW AC]
+                    <button type="button" class="info_button">?</button>
+                </label>
+                <br>
+                <input id="demand_data_input" type="file" name="demand_data_file" accept=".csv" required
+                    oninvalid="this.setCustomValidity('What am I supposed to do. Read your mind?')"
+                    oninput="this.setCustomValidity('')">
+            </div>
+
+            <!-- Solar inputs -->
+            <button type="button" class="collapsible">Solar</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>CapEx</h4>
+                        <p>Provide a dollar per kiloWatt estimate of all upfront expenses for solar generation. This includes cost of purchase, shipping, initial installation, and upfront training costs. Capital expenditure values will be automatically annualized based on equiment lifetime and discounting rate. Do not annualize your input capital expenditure value.</p>
+                    </div>
+                </div>
+                <label for="capexsolar">
+                    CapEx [$/kW installed]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="capexsolar" id="capexsolar" placeholder="CapEx" value="{{ capexsolar }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>OpEx</h4>
+                        <p>Provide an estimate of the operations and maintenance costs in dollars per kiloWatt-hour produced for solar generation. There should be no overlap between capital expenditure values and operational expenditure values. Operational expenditure values include regular operations, maintenance, and training costs.</p>
+                    </div>
+                </div>
+                <label for="opexsolar">
+                    OpEx [$/kWh produced]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="opexsolar" id="opexsolar" placeholder="OpEx" value="{{ opexsolar }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Tilt</h4>
+                        <p>Provide a tilt angle for the installed solar panels. An input of "Latitude" matches the tilt angle to the latitude of your installation, a very common means maximizing annual solar production.</p>
+                    </div>
+                </div>
+                <label for="tilt">
+                    Tilt [degrees]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="tilt" id="tilt" placeholder="Tilt" value="{{ tilt }}" pattern="^ *[1-8]?[0-9](\.\d*)? *| *90(\.\d*)? *|Latitude$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Lifetime</h4>
+                        <p>The lifetime of your solar generation refers to its expected functional period. This value will be used to annualize equipment capital expenditures.</p>
+                    </div>
+                </div>
+                <label for="lifetimesolar">
+                    Lifetime [years]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="lifetimesolar" id="lifetimesolar" placeholder="Lifetime" value="{{ lifetimesolar }}" pattern="^ *[1-9]\d*(\.\d*)? *| *0*\.\d+ *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Efficiency</h4>
+                        <p>Solar efficiency accounts for performance losses you would expect in a real system due to soiling, shading, connections, etc. Note that DC to AC conversion losses have already been accounted for in this model.</p>
+                    </div>
+                </div>
+                <label for="efficiencysolar">
+                    Efficiency (0 - 1):
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="efficiencysolar" id="efficiencysolar" placeholder="Efficiency" value="{{ efficiencysolar }}" pattern="^ *(0(\.\d+)?|1(\.0+)?) *$" required>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Maximum Capacity</h4>
+                        <p>Provide a maximum capacity value if you want to manually set a hard cap on the amount of installed capacity. An input of 'None' will not set a maximum capacity value.</p>
+                    </div>
+                </div>
+                <label for="maxcapsolar">
+                    Maximum Capacity [kW] or None:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="maxcapsolar" id="maxcapsolar" placeholder="Maximum Capacity" value="{{ maxcapsolar }}" pattern="^ *\d+(\.\d*)? *|None$" required/>
+            </div>
+
+            <!-- Electric Storage inputs -->
+            <button type="button" class="collapsible">Battery Electric Storage</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>CapEx</h4>
+                        <p>Provide a dollar per kiloWatt-hour estimate of all upfront expenses for battery electric storage. This includes cost of purchase, shipping, initial installation, and upfront training costs. Capital expenditure values will be automatically annualized based on equiment lifetime and discounting rate. Do not annualize your input capital expenditure value.</p>
+                    </div>
+                </div>
+                <label for="capexelectric">
+                    CapEx [$/kWh installed]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="capexelectric" id="capexelectric" placeholder="CapEx" value="{{ capexelectric }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>OpEx</h4>
+                        <p>Provide an estimate of the operations and maintenance costs in dollars per kiloWatt-hour stored. There should be no overlap between capital expenditure values and operational expenditure values. Operational expenditure values include regular operations, maintenance, and training costs.</p>
+                    </div>
+                </div>
+                <label for="opexelectric">
+                    OpEx [$/kWh stored]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="opexelectric" id="opexelectric" placeholder="OpEx" value="{{ opexelectric }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Lifetime</h4>
+                        <p>The lifetime of your battery electric storage refers to its expected functional period. This value will be used to annualize equipment capital expenditures.</p>
+                    </div>
+                </div>
+                <label for="lifetimeelectric">
+                    Lifetime [years]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="lifetimeelectric" id="lifetimeelectric" placeholder="Lifetime" value="{{ lifetimeelectric }}" pattern="^ *[1-9]\d*(\.\d*)? *| *0*\.\d+ *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Efficiency</h4>
+                        <p>Battery electric storage efficiency accounts for performance losses you would expect in a real system due to internal resistance, aging, degredation, etc. Please provide a round-trip efficiency value that accounts for losses both in and out of the system.</p>
+                    </div>
+                </div>
+                <label for="efficiencyelectric">
+                    Round-Trip Efficiency (0 - 1):
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="efficiencyelectric" id="efficiencyelectric" placeholder="Efficiency" value="{{ efficiencyelectric }}" pattern="^ *(0(\.\d+)?|1(\.0+)?) *$" required>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Discharge Time/Duration</h4>
+                        <p>Discharge time or duration refers to the period of time a battery needs to charge or discharge its full storage capacity. In general, 4-hour storage is recommend, where the battery can charge or discharged its full capacity in 4 hours.</p>
+                    </div>
+                </div>
+                <label for="dischargetimeelectric">
+                    Discharge Time [hours]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="dischargetimeelectric" id="dischargetimeelectric" placeholder="Discharge Time" value="{{ dischargetimeelectric }}" pattern="^ *[1-9]\d*(\.\d*)? *| *0*\.\d+ *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Self Discharge Rate</h4>
+                        <p>All batteries when charged will slowly dissipate that charge at a rate known as the self discharge rate. In most cases this is negligible. If you want to account for self discharge, provide the fraction of a battery's charge that is dissipated per hour.</p>
+                    </div>
+                </div>
+                <label for="dischargerateelectric">
+                    Self Discharge Rate (0 - 1) [1/hr]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="dischargerateelectric" id="dischargerateelectric" placeholder="Self Discharge Rate" value="{{ dischargerateelectric }}" pattern="^ *(0(\.\d+)?|1(\.0+)?) *$" required>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Maximum Capacity</h4>
+                        <p>Provide a maximum capacity value if you want to manually set a hard cap on the amount of installed capacity. An input of 'None' will not set a maximum capacity value.</p>
+                    </div>
+                </div>
+                <label for="maxcapelectric">
+                    Maximum Capacity [kWh] or None:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="maxcapelectric" id="maxcapelectric" placeholder="Maximum Capacity" value="{{ maxcapelectric }}" pattern="^ *\d+(\.\d*)? *|None$" required/>
+            </div>
+
+            <!-- Electrolyzer inputs -->
+            <button type="button" class="collapsible">Electrolyzer</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>CapEx</h4>
+                        <p>Provide a dollar per kiloWatt estimate of all upfront expenses for installed electrolyzer capacity. This includes cost of purchase, shipping, initial installation, and upfront training costs. Capital expenditure values will be automatically annualized based on equiment lifetime and discounting rate. Do not annualize your input capital expenditure value.</p>
+                    </div>
+                </div>
+                <label for="capexelectrolyzer">
+                    CapEx [$/kW installed]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="capexelectrolyzer" id="capexelectrolyzer" placeholder="CapEx" value="{{ capexelectrolyzer }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>OpEx</h4>
+                        <p>Provide an estimate of the operations and maintenance costs in dollars per kiloWatt-hour consumed for hydrogen production. There should be no overlap between capital expenditure values and operational expenditure values. Operational expenditure values include regular operations, water consumption, maintenance, and training costs.</p>
+                    </div>
+                </div>
+                <label for="opexelectrolyzer">
+                    OpEx [$/kWh consumed]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="opexelectrolyzer" id="opexelectrolyzer" placeholder="OpEx" value="{{ opexelectrolyzer }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Lifetime</h4>
+                        <p>The lifetime of your electrolyzer refers to its expected functional period. This value will be used to annualize equipment capital expenditures.</p>
+                    </div>
+                </div>
+                <label for="lifetimeelectrolyzer">
+                    Lifetime [years]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="lifetimeelectrolyzer" id="lifetimeelectrolyzer" placeholder="Lifetime" value="{{ lifetimeelectrolyzer }}" pattern="^ *[1-9]\d*(\.\d*)? *| *0*\.\d+ *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Efficiency</h4>
+                        <p>Electrolyzer efficiency accounts for performance losses you would expect in a real system due to water purification, electrochemical processes, and aging.</p>
+                    </div>
+                </div>
+                <label for="efficiencyelectrolyzer">
+                    Efficiency (0 - 1):
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="efficiencyelectrolyzer" id="efficiencyelectrolyzer" placeholder="Efficiency" value="{{ efficiencyelectrolyzer }}" pattern="^ *(0(\.\d+)?|1(\.0+)?) *$" required>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Maximum Capacity</h4>
+                        <p>Provide a maximum capacity value if you want to manually set a hard cap on the amount of installed capacity. An input of 'None' will not set a maximum capacity value.</p>
+                    </div>
+                </div>
+                <label for="maxcapelectrolyzer">
+                    Maximum Capacity [kW] or None:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="maxcapelectrolyzer" id="maxcapelectrolyzer" placeholder="Maximum Capacity" value="{{ maxcapelectrolyzer }}" pattern="^ *\d+(\.\d*)? *|None$" required/>
+            </div>
+
+            <!-- Hydrogen Storage inputs -->
+            <button type="button" class="collapsible">Hydrogen Storage</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>CapEx</h4>
+                        <p>Provide a dollar per kiloWatt-hour estimate of all upfront expenses for hydrogen storage. This includes cost of purchase, shipping, initial installation, and upfront training costs. Capital expenditure values will be automatically annualized based on equiment lifetime and discounting rate. Do not annualize your input capital expenditure value.</p>
+                        <p>Note that hydrogen storage capacity is in units of kWh not kg H2. A theoretical conversion rate of 3 kg H2 = 100 kWh has been utilized in this model. All relevant losses (except self discharge) are accounted for in hydrogen production at the electrolyzer and in hydrogen oxidation at the fuel cell.</p>
+                    </div>
+                </div>
+                <label for="capexhydrogen">
+                    CapEx [$/kWh installed]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="capexhydrogen" id="capexhydrogen" placeholder="CapEx" value="{{ capexhydrogen }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Lifetime</h4>
+                        <p>The lifetime of your hydrogen storage refers to its expected functional period. This value will be used to annualize equipment capital expenditures.</p>
+                    </div>
+                </div>
+                <label for="lifetimehydrogen">
+                    Lifetime [years]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="lifetimehydrogen" id="lifetimehydrogen" placeholder="Lifetime" value="{{ lifetimehydrogen }}" pattern="^ *[1-9]\d*(\.\d*)? *| *0*\.\d+ *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Maximum Capacity</h4>
+                        <p>Provide a maximum capacity value if you want to manually set a hard cap on the amount of installed capacity. An input of 'None' will not set a maximum capacity value.</p>
+                    </div>
+                </div>
+                <label for="maxcaphydrogen">
+                    Maximum Capacity [kWh] or None:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="maxcaphydrogen" id="maxcaphydrogen" placeholder="Maximum Capacity" value="{{ maxcaphydrogen }}" pattern="^ *\d+(\.\d*)? *|None$" required/>
+            </div>
+
+            <!-- Fuel Cell inputs -->
+            <button type="button" class="collapsible">Fuel Cell</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>CapEx</h4>
+                        <p>Provide a dollar per kiloWatt estimate of all upfront expenses for installed fuel cell capacity. This includes cost of purchase, shipping, initial installation, and upfront training costs. Capital expenditure values will be automatically annualized based on equiment lifetime and discounting rate. Do not annualize your input capital expenditure value.</p>
+                    </div>
+                </div>
+                <label for="capexfuelcell">
+                    CapEx [$/kW installed]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="capexfuelcell" id="capexfuelcell" placeholder="CapEx" value="{{ capexfuelcell }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>OpEx</h4>
+                        <p>Provide an estimate of the operations and maintenance costs in dollars per kiloWatt-hour produced for hydrogen production. There should be no overlap between capital expenditure values and operational expenditure values. Operational expenditure values include regular operations, maintenance, and training costs.</p>
+                    </div>
+                </div>
+                <label for="opexfuelcell">
+                    OpEx [$/kWh produced]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="opexfuelcell" id="opexfuelcell" placeholder="OpEx" value="{{ opexfuelcell }}" pattern="^ *-? ?\d*(\.\d*)? *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Lifetime</h4>
+                        <p>The lifetime of your fuel cell refers to its expected functional period. This value will be used to annualize equipment capital expenditures.</p>
+                    </div>
+                </div>
+                <label for="lifetimefuelcell">
+                    Lifetime [years]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="lifetimefuelcell" id="lifetimefuelcell" placeholder="Lifetime" value="{{ lifetimefuelcell }}" pattern="^ *[1-9]\d*(\.\d*)? *| *0*\.\d+ *$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Efficiency</h4>
+                        <p>Electrolyzer efficiency accounts for performance losses you would expect in a real system due to electrochemical processes, and aging.</p>
+                    </div>
+                </div>
+                <label for="efficiencyfuelcell">
+                    Efficiency (0 - 1):
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="efficiencyfuelcell" id="efficiencyfuelcell" placeholder="Efficiency" value="{{ efficiencyfuelcell }}" pattern="^ *(0(\.\d+)?|1(\.0+)?) *$" required>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Maximum Capacity</h4>
+                        <p>Provide a maximum capacity value if you want to manually set a hard cap on the amount of installed capacity. An input of 'None' will not set a maximum capacity value.</p>
+                    </div>
+                </div>
+                <label for="maxcapfuelcell">
+                    Maximum Capacity [kW] or None:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="maxcapfuelcell" id="maxcapfuelcell" placeholder="Maximum Capacity" value="{{ maxcapfuelcell }}" pattern="^ *\d+(\.\d*)? *|None$" required/>
+            </div>
+
+            <!-- Econ inputs -->
+            <button type="button" class="collapsible">Economic</button>
+            <div class="collapsed">
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Discounting Rate</h4>
+                        <p>Provide a discounting rate to annualize capital expenditures. The initial input is set to 0.04 to account for the time value of money due to inflation only.</p>
+                    </div>
+                </div>
+                <label for="discountingrate">
+                    Discounting Rate (0 - 1):
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="discountingrate" id="discountingrate" placeholder="Discountring Rate" value="{{ discountingrate }}" pattern="^(0(\.\d+)?|1(\.0+)?)$" required/>
+                <br>
+                <div class="info_container">
+                    <div class="info">
+                        <h4>Cost of Unmet Demand</h4>
+                        <p>To increase model flexibility, the model is capable of ignoring demand at a cost. This value can act as a proxy to determine how strongly you want to meet demand, or can be based upon a contractual payout for unmet demand. A standard value for large scale grid models is $10/kWh, where levelized cost of energy generally sits between $0.1/kWh and $0.15/kWh.</p>
+                    </div>
+                </div>
+                <label for="costslack">
+                    Cost of Unmet Demand [$/kWh]:
+                    <button type="button" class="info_button">?</button>
+                </label><!--
+                --><input type="text" name="costslack" id="costslack" placeholder="Cost of Unmet Demand" value="{{ costslack }}" pattern="^-?\d*(\.\d+)?$" required/>
+            </div>
+
+            <input id="submit" type="submit" value="Submit"><!--
+            --><input id="reset" type="reset" value="Reset">
+        </form>
+    </div>
+    <!--<form action="/shutdown" method="post" onsubmit="return confirm('Are you sure you want to quit?');" class="center">
+        <button type="submit">Quit</button>
+    </form>-->
+    <br><br><br>
+
+
+<!-- Form submission functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (form.checkValidity()) {
+                } else {
+                    // Prevent submission if invalid
+                    e.preventDefault();
+
+                    if (form.classList.contains("input_form")) {
+                        const errorFields = form.querySelectorAll("input:invalid");
+                        errorFields.forEach(function (field) {
+                            const section = field.closest(".collapsed");
+                            const isHidden = getComputedStyle(section).display === "none";
+                            if (section && isHidden) {
+                                section.previousElementSibling.classList.toggle("active");
+                                section.style.display = "block";
+                            }
+                        });
+                    }
+
+                    form.reportValidity(); // Show browser's validation errors
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Creates collapsible div functionality -->
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+for (i = 0; i < coll.length; i++) {
+    coll[i].nextElementSibling.style.display = "none"
+    if (coll[i].id === "demand_data_collapsible" || coll[i].id === "solar_data_collapsible") {
+        coll[i].classList.toggle("active");
+        coll[i].nextElementSibling.style.display = "block"
+    }
+    coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+            content.style.display = "none";
+        } else {
+            content.style.display = "block";
+        }
+    });
+}
+</script>
+
+<!-- Creates info button functionality -->
+<script>
+var buts = document.getElementsByClassName("info_button");
+var cons = document.getElementsByClassName("info_container")
+var i;
+var j;
+for (i = 0; i < buts.length; i++) {
+    buts[i].addEventListener("click", function() {
+        var label = this.parentElement;
+        var container = label.previousElementSibling;
+        if (container.style.display === "block") {
+        container.style.display = "none";
+        } else {
+            for (j = 0; j < cons.length; j++) {
+                cons[j].style.display = "none";
+            }
+        container.style.display = "block";
+        }
+    });
+}
+</script>
+
+<!-- Shows slider value -->
+<script>
+    const value = document.querySelector("#weatherseverityvalue");
+    const input = document.querySelector("#weatherseverity");
+    value.textContent = (input.value / 22).toFixed(2);
+    input.addEventListener("input", (event) => {
+        value.textContent = (event.target.value / 22).toFixed(2);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+bitshuffle-0.5.2.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+bitshuffle-0.5.2.dist-info/METADATA,sha256=ExwmdEuND5YKoFBYx1VoFKbAo05H1ZwRnJg6O1Gpen4,11777
+bitshuffle-0.5.2.dist-info/RECORD,,
+bitshuffle-0.5.2.dist-info/WHEEL,sha256=8UP9x9puWI0P1V_d7K2oMTBqfeLNm21CTzZ_Ptr0NXU,101
+bitshuffle-0.5.2.dist-info/licenses/LICENSE,sha256=7zV8IGHPZ9spj58VZVcu4imtkmNYKp-dDr_1CU9dEKw,1148
+bitshuffle-0.5.2.dist-info/top_level.txt,sha256=aysWHNjo4AFo3qaY8MnX5nkAo4CPfWIqbySPwO9UPbY,11
+bitshuffle/__init__.py,sha256=Nri-fGx_BeBZimNe4JoibP1eAsnq2Sr3S7Op6JVdsGs,908
+bitshuffle/__pycache__/__init__.cpython-312.pyc,,
+bitshuffle/ext.cp312-win_amd64.pyd,sha256=2X-j38vjvv44D9uhfoU1RRwZen1oPPA5UyQauYa0HNw,157184

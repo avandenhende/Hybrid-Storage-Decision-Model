@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capacity Expansion Model</title>
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet" />
+</head>
+<body>
+    <div id="content" class="center">
+        <br>
+        <h1>Download Location Specific Demand Profiles</h1>
+        <form id="demand_form" action="/download_demand" method="POST" enctype="multipart/form-data" class="input_form">
+            <label for="ba">Balancing Authority:</label><!--
+            --><select id="ba" name="ba" onchange="updateSubregions()" required>
+                <option value="" disabled selected>-- Select BA --</option>
+                <option value="AZPS">Arizona Public Service Company</option>
+                <option value="AECI">Associated Electric Cooperative, Inc.</option>
+                <option value="AVA">Avista Corporation</option>
+                <option value="BANC">Balancing Authority of Northern California</option>
+                <option value="BPAT">Bonneville Power Administration</option>
+                <option value="CHPD">Public Utility District No. 1 of Chelan County</option>
+                <option value="CISO">California Independent System Operator</option>
+                <option value="CPLE">Duke Energy Progress East</option>
+                <option value="CPLW">Duke Energy Progress West</option>
+                <option value="DOPD">PUD No. 1 of Douglas County</option>
+                <option value="DUK">Duke Energy Carolinas</option>
+                <option value="EPE">El Paso Electric Company</option>
+                <option value="ERCO">Electric Reliability Council of Texas, Inc.</option>
+                <option value="FMPP">Florida Municipal Power Pool</option>
+                <option value="FPC">Duke Energy Florida, Inc.</option>
+                <option value="FPL">Florida Power & Light Co.</option>
+                <option value="GCPD">Public Utility District No. 2 of Grant County, Washington</option>
+                <option value="GVL">Gainesville Regional Utilities</option>
+                <option value="HST">City of Homestead</option>
+                <option value="IID">Imperial Irrigation District</option>
+                <option value="IPCO">Idaho Power Company</option>
+                <option value="ISNE">ISO New England</option>
+                <option value="JEA">Jacksonville Electric Authority</option>
+                <option value="LDWP">Los Angeles Department of Water and Power</option>
+                <option value="LGEE">Louisville Gas and Electric Company and Kentucky Utilities Company</option>
+                <option value="MISO">Midcontinent Independent System Operator, Inc.</option>
+                <option value="NEVP">Nevada Power Company</option>
+                <option value="NWMT">NorthWestern Corporation</option>
+                <option value="NYIS">New York Independent System Operator</option>
+                <option value="PACE">PacifiCorp East</option>
+                <option value="PACW">PacifiCorp West</option>
+                <option value="PGE">Portland General Electric Company</option>
+                <option value="PJM">PJM Interconnection, LLC</option>
+                <option value="PNM">Public Service Company of New Mexico</option>
+                <option value="PSCO">Public Service Company of Colorado</option>
+                <option value="PSEI">Puget Sound Energy, Inc.</option>
+                <option value="SC">South Carolina Public Service Authority</option>
+                <option value="SCEG">Dominion Energy South Carolina, Inc.</option>
+                <option value="SCL">Seattle City Light</option>
+                <option value="SEC">Seminole Electric Cooperative</option>
+                <option value="SOCO">Southern Company Services, Inc. - Trans</option>
+                <option value="SPA">Southwestern Power Administration</option>
+                <option value="SRP">Salt River Project Agricultural Improvement and Power District</option>
+                <option value="SWPP">Southwest Power Pool</option>
+                <option value="TAL">City of Tallahassee</option>
+                <option value="TEC">Tampa Electric Company</option>
+                <option value="TEPC">Tucson Electric Power</option>
+                <option value="TIDC">Turlock Irrigation District</option>
+                <option value="TPWR">City of Tacoma, Department of Public Utilities, Light Division</option>
+                <option value="TVA">Tennessee Valley Authority</option>
+                <option value="WACM">Western Area Power Administration - Rocky Mountain Region</option>
+                <option value="WALC">Western Area Power Administration - Desert Southwest Region</option>
+                <option value="WAUW">Western Area Power Administration - Upper Great Plains West</option>                
+            </select>
+
+            <!-- Subregion selector (hidden until needed) -->
+            <div id="subregion-container" style="display:none;">
+                <label for="subregion">Subregion:</label><!--
+                --><select id="subregion" name="subregion">
+                    <option value="" disabled selected>-- Select Subregion --</option>
+                    <!-- Options will be filled dynamically -->
+                </select>
+            </div>
+            
+            <div class="info_container">
+                <div class="info">
+                    <h4>Total Annual Demand</h4>
+                    <p>Defining the total annual demand of your system will scale your selected demand profile to match your system's total annual demand. An input of "None" will return the selected balancing authorities actual demand values in kWh.</p>
+                </div>
+            </div>
+            <label for="annualdemand">
+                Total Annual Demand [MWh]:
+                <button type="button" class="info_button">?</button>
+            </label><!--
+            --><input type="text" name="annualdemand" id="annualdemand" placeholder="Total Annual Demand" value="None" pattern="^-?\d*(\.\d+)?|None$" required/>
+
+            <button id="submit-button" type="submit" style="font-weight:bold;width:49%;margin-right:1%">Get Demand</button><!--
+            --><a class="demand_route" href="javascript:history.back()" style="width:49%;margin-left:1%;text-align:center;">Return to Capacity Expansion Model</a>
+        </form>
+        
+    </div>
+    <br><br><br>
+
+
+</body>
+
+
+<script type="application/json" id="subregion-data">
+    {{ ba_subregions | tojson | safe }}
+</script>
+
+<script>
+    const subregionMap = JSON.parse(
+        document.getElementById('subregion-data').textContent
+    );
+
+    function updateSubregions() {
+        const ba = document.getElementById('ba').value;
+        const subContainer = document.getElementById('subregion-container');
+        const subSelect = document.getElementById('subregion');
+
+        // Clear previous options
+        subSelect.innerHTML = "<option value='' disabled selected>-- Select Subregion --</option>";
+
+        if (ba && subregionMap[ba] && subregionMap[ba].length > 0) {
+            // Populate subregions
+            subregionMap[ba].forEach(sr => {
+                const option = document.createElement("option");
+                option.value = sr[0];
+                option.textContent = sr[1];
+                subSelect.appendChild(option);
+            });
+            subContainer.style.display = "block";
+            subSelect.setAttribute('required', 'true');
+        } else {
+            subContainer.style.display = "none";
+            subSelect.removeAttribute('required');
+            subSelect.value = ''; // reset selection
+        }
+    }
+</script>
+
+<script>
+    document.getElementById('demand-form').addEventListener('submit', function (e) {
+        const submitBtn = document.getElementById('submit-button');
+        // Disable the button immediately
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Loading..."; // Optional feedback
+    });
+</script>
+
+<!-- Creates info button functionality -->
+<script>
+var buts = document.getElementsByClassName("info_button");
+var cons = document.getElementsByClassName("info_container")
+var i;
+var j;
+for (i = 0; i < buts.length; i++) {
+    buts[i].addEventListener("click", function() {
+        var label = this.parentElement;
+        var container = label.previousElementSibling;
+        if (container.style.display === "block") {
+        container.style.display = "none";
+        } else {
+            for (j = 0; j < cons.length; j++) {
+                cons[j].style.display = "none";
+            }
+        container.style.display = "block";
+        }
+    });
+}
+</script>
+</html>
