@@ -1,0 +1,7 @@
+[console_scripts]
+hsds = hsds.app:main
+hsds-chunklocator = hsds.chunklocator:main
+hsds-datanode = hsds.datanode:main
+hsds-headnode = hsds.headnode:main
+hsds-node = hsds.node_runner:main
+hsds-servicenode = hsds.servicenode:main
