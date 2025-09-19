@@ -130,6 +130,15 @@ button {
     cursor: pointer;
 }
 
+#plot_copy {
+    width: 100%;
+    font-weight: bold;
+    margin-left: 0%;
+    color: black;
+    text-decoration: none;
+    text-align: center
+}
+
 table {
     width: 100%;
     font-weight: bold;
@@ -345,3 +354,4 @@ select {
 select:focus {
     border-color: #dddddd;
 }
+

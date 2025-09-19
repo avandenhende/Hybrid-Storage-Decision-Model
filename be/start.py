@@ -384,7 +384,7 @@ async def run_output(session_data, request: Request):
 
     netSystemEfficiency = 100 * sum(netPower) / (sum(solarProduction) / session_data['efficiencysolar'])
     waterConsumption = sum(hydrogenStorageIn) * session_data['efficiencyelectrolyzer'] * 0.03 * (18.01528 / 2.016) * (1 / 0.7)
-                    # kWh into the electrolyzer * efficiency of the electrolyzer * kg/kWh * kg H2O/kg H2 * water in/water consumed
+                    # kWh into the electrolyzer * efficiency of the electrolyzer * kg/kWh * kg H2O/kg H2 * water in/water converted (numbers from ***)
 
 
     # Create results dataframe
@@ -533,7 +533,7 @@ async def plot(request: Request):
             templn = ax2.plot(range(start - 1, end), arr[start - 1:end], label = labels[i], color = session_data.get(color_inputs[i]))
             lns += templn
 
-    ax1.set_title('Capacity Expansion Model')
+    ax1.set_title('Hybrid Storage Decision Model', fontsize = 14)
     ax2.legend(lns, [l.get_label() for l in lns], loc = 'lower right')
     fig.tight_layout()
 

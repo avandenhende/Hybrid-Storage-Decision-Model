@@ -55,8 +55,9 @@
         <a id="downloadresults" href="/download_results/{{ downloadresults }}" download> Download Results </a>
         <br>
         <!-- Model plots -->
-        <img src="data:image/png;base64,{{ data }}" alt="Plot" width="100%" height="auto">
-        <br>
+        <img id="plot" src="data:image/png;base64,{{ data }}" alt="Plot" width="100%" height="auto">
+        <button id="plot_copy"> Copy to Clipboard </button>
+        <br><br>
         <!-- Plot preference form -->
         <h1> Plot Model Outputs </h1>
         <form action="/plot" method="POST" enctype="multipart/form-data" novalidate>
@@ -630,5 +631,33 @@ for (i = 0; i < buts.length; i++) {
         value.textContent = (event.target.value / 22).toFixed(2);
     });
 </script>
+
+<!-- Copy button for plot-->
+<script>
+document.getElementById("plot_copy").addEventListener("click", async () => {
+    const img = document.getElementById("plot");
+    
+    // Create an off-screen canvas
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    // Convert canvas to blob
+    canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        try {
+            await navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })
+            ]);
+            alert("Image copied to clipboard!");
+        } catch (err) {
+            console.error("Failed to copy: ", err);
+        }
+    }, "image/png");
+});
+</script>
+
 </body>
 </html>
