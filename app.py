@@ -158,7 +158,13 @@ def splash_loop(splash):
 if __name__ == '__main__':
     splash = webview.create_window(
         "Loading...",
-        html="<h2>Starting up, please wait...</h2>",
+        html = """
+        <div style="display: flex; justify-content: center; align-items: center; height: 140px">
+            <h2 style="font-family: Arial, sans-serif; line-height: 1; text-align: center; font-size: 48px;">
+            HS<br>DM
+            </h2>
+        </div>
+        """,
         width = 200,
         height = 200,
         resizable=False,
@@ -173,11 +179,10 @@ if __name__ == '__main__':
     #start_app(process)
 
 
-# User manual (data initiation template)
-# Git/GitHub
+# User manual FAQ and Acknowledgements
+# User manual licenses (and licenses file)
 # Updated mac version
-# Copy and/or download image buttons
-# Splash window visuals
+# Separate sections on plot screen, better headings
 
 
 
