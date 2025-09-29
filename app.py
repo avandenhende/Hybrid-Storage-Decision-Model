@@ -1,13 +1,15 @@
 import os, sys
 os.environ["AWS_S3_GATEWAY"] = "http://s3.us-west-2.amazonaws.com"
 os.environ["AWS_S3_NO_SIGN_REQUEST"] = "1"
+os.environ["HS_ENDPOINT"] = "http://localhost:5101"
+os.environ["HS_BUCKET"] = "nrel-pds-hsds"
 
 if getattr(sys, 'frozen', False):
     MAIN_DIR = os.path.dirname(sys.executable)
 else:
     MAIN_DIR = os.path.dirname(os.path.abspath(__file__))
 
-os.environ["H5PYD_CFG"] = os.path.join(MAIN_DIR, '.hscfg')
+#os.environ["H5PYD_CFG"] = os.path.join(MAIN_DIR, '.hscfg')
 
 
 import webview, threading, sys, shutil, psutil, time, logging, python_multipart, subprocess

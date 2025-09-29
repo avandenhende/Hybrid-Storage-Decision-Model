@@ -1,0 +1,44 @@
+Metadata-Version: 2.4
+Name: h5pyd
+Version: 0.22.0
+Summary: h5py compatible client lib for HDF REST API
+Author-email: John Readey <jreadey@hdfgroup.org>
+Maintainer-email: John Readey <jreadey@hdfgroup.org>
+Project-URL: Source, https://github.com/HDFGroup/h5pyd
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: Unix
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Database
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.8
+Description-Content-Type: text/x-rst
+License-File: COPYING
+Requires-Dist: numpy>=2.0.0rc1; python_version >= "3.9"
+Requires-Dist: requests_unixsocket
+Requires-Dist: pytz
+Requires-Dist: packaging
+Provides-Extra: azure
+Requires-Dist: msrestazure; extra == "azure"
+Requires-Dist: adal; extra == "azure"
+Provides-Extra: google
+Requires-Dist: google-api-python-client; extra == "google"
+Requires-Dist: google-auth-oauthlib; extra == "google"
+Requires-Dist: google-auth<2.0dev; extra == "google"
+Provides-Extra: aws
+Requires-Dist: s3fs; extra == "aws"
+Provides-Extra: hdf5
+Requires-Dist: h5py; extra == "hdf5"
+Dynamic: license-file
+
+The h5pyd library provides a high-level interface to the HDF REST specification that is generally easier to use than invoking http calls directly.
+
+This package is based on the popular h5py package and aims to be source compatible with the h5py high level interface.

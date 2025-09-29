@@ -1,0 +1,15 @@
+[console_scripts]
+hsacl = h5pyd._apps.hsacl:main
+hsconfigure = h5pyd._apps.hsconfigure:main
+hscopy = h5pyd._apps.hscopy:main
+hscp = h5pyd._apps.hscopy:main
+hsdel = h5pyd._apps.hsdel:main
+hsdiff = h5pyd._apps.hsdiff:main
+hsget = h5pyd._apps.hsget:main
+hsinfo = h5pyd._apps.hsinfo:main
+hsload = h5pyd._apps.hsload:main
+hsls = h5pyd._apps.hsls:main
+hsmv = h5pyd._apps.hsmv:main
+hsrm = h5pyd._apps.hsdel:main
+hsstat = h5pyd._apps.hsstat:main
+hstouch = h5pyd._apps.hstouch:main

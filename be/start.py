@@ -427,8 +427,8 @@ async def run_output(session_data, request: Request):
 
 
     # Formats the title based on the PVWatts output
-    if city == '':
-        if state == '':
+    if city == '' or city is None or city == 'None':
+        if state == '' or state is None or state == 'None':
             title = country
         else:
             title = state + ', ' + country
