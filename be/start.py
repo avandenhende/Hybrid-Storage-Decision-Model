@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Response, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from starlette.concurrency import run_in_threadpool
@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 from matplotlib.colors import is_color_like
 from datetime import datetime, timedelta
 from pprint import pprint
-import os, base64, uuid, numpy as np, pandas as pd, signal, sys, tempfile, asyncio, requests, math
+import os, base64, uuid, numpy as np, pandas as pd, signal, sys, tempfile, asyncio, requests, math, io
 
 from be.model import get_solar_availability, get_output, annuity, load_env
 
@@ -653,7 +653,7 @@ async def download_demand(request: Request):
         annualdemand = form.get('annualdemand', 'None')
         
         if subregion is None or subregion == '':
-            ßsubregion = 'None'
+            subregion = 'None'
         
         ba_global = ba
         subregion_global = subregion
@@ -671,12 +671,32 @@ async def download_demand(request: Request):
     if not os.path.exists(filepath):
         return throw_error("Sorry an error occured. Please try again.", request)
 
-    response = FileResponse(
-        path=filepath,
-        filename=filename,
-        media_type='application/octet-stream'
-    )
-    return response
+    try:
+        # Load CSV
+        df = pd.read_csv(filepath, header=None)
+
+        # Convert annualdemand to float
+        annualdemand = float(annualdemand)
+
+        # Multiply only numeric columns by annualdemand
+        numeric_cols = df.select_dtypes(include=['number']).columns
+        df[numeric_cols] = df[numeric_cols].apply(lambda x: x * annualdemand/8.76)
+
+        # Save to buffer
+        buffer = io.StringIO()
+        df.to_csv(buffer, index=False, header=False)
+        buffer.seek(0)
+
+        # Return as downloadable CSV
+        response = StreamingResponse(
+            iter([buffer.getvalue()]),
+            media_type="text/csv"
+        )
+        response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
+
+    except Exception as e:
+        return throw_error(f"Error processing file: {str(e)}", request)
 
 
 # Shutdown route to close the waitress thread

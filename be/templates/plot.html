@@ -29,7 +29,7 @@
             </tr>
             <tr>
                 <td>Water Consumption</td>
-                <td>{{ waterConsumption }} kg of water</td>
+                <td>{{ (waterConsumption / 365) | round(2) }} kg water/day or {{ waterConsumption | round(1) }} kg water/year</td>
             </tr>
             <tr>
                 <td>Solar Capacity</td>
@@ -644,19 +644,28 @@ document.getElementById("plot_copy").addEventListener("click", async () => {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0);
 
-    // Convert canvas to blob
-    canvas.toBlob(async (blob) => {
-        if (!blob) return;
+    // Chrome/Edge/Firefox: try clipboard API first
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (navigator.clipboard && navigator.clipboard.write && !isSafari) {
         try {
-            await navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob })
-            ]);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
             alert("Image copied to clipboard!");
+            return;
         } catch (err) {
-            console.error("Failed to copy: ", err);
+            console.warn("Clipboard write failed, falling back:", err);
         }
-    }, "image/png");
+    }
+
+    // Safari fallback: force download via DataURL (sync, still in click handler)
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "plot.png";
+    a.click();
 });
+
 </script>
 
 </body>

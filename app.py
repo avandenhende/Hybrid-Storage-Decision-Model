@@ -184,8 +184,6 @@ if __name__ == '__main__':
 # User manual FAQ and Acknowledgements
 # User manual licenses (and licenses file)
 # Updated mac version for ARM
-# Remove .env file in .app file
-# Enable mac copy to clipboard functionality
 
 
 

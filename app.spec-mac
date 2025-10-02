@@ -27,7 +27,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Capacity Expansion Model (mac)',
+    name='Hybrid Storage Decision Model',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -50,7 +50,7 @@ coll = COLLECT(
 )
 app = BUNDLE(
     coll,
-    name='Capacity Expansion Model (mac).app',
+    name='Hybrid-Storage-Decision-Model-vX.X.X-Mac.app',
     icon=None,
     bundle_identifier=None,
 )

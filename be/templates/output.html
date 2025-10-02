@@ -28,7 +28,7 @@
             </tr>
             <tr>
                 <td>Water Consumption</td>
-                <td>{{ waterConsumption }} kg of water</td>
+                <td>{{ (waterConsumption / 365) | round(2) }} kg water/day or {{ waterConsumption | round(1) }} kg water/year</td>
             </tr>
             <tr>
                 <td>Solar Capacity</td>
