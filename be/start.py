@@ -682,16 +682,18 @@ async def download_demand(request: Request):
         numeric_cols = df.select_dtypes(include=['number']).columns
         df[numeric_cols] = df[numeric_cols].apply(lambda x: x * annualdemand/8.76)
 
-        # Save to buffer
-        buffer = io.StringIO()
-        df.to_csv(buffer, index=False, header=False)
-        buffer.seek(0)
+        download_filepath = os.path.join(TEMP_FOLDER, 'demand_data', filename)
+
+        os.makedirs(os.path.join(TEMP_FOLDER, 'demand_data'), exist_ok = True)
+        df.to_csv(download_filepath, index=False, header=False)
 
         # Return as downloadable CSV
-        response = StreamingResponse(
-            iter([buffer.getvalue()]),
-            media_type="text/csv"
+        response = FileResponse(
+            path = download_filepath,
+            filename = filename,
+            media_type = 'application/octet_stream'
         )
+        
         response.headers["Content-Disposition"] = f"attachment; filename={filename}"
         return response
 
