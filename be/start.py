@@ -13,6 +13,8 @@ import os, base64, uuid, numpy as np, pandas as pd, signal, sys, tempfile, async
 
 from be.model import get_solar_availability, get_output, annuity, load_env
 
+GUROBI = False
+
 
 # ------------- Functions ---------------
 # Determines if an input value (usually string) can be converted to a float
@@ -150,13 +152,13 @@ async def index(request: Request):
             'lat': 18.1263,
             'lon': -65.4401,
             'weatherseverity': 11,
-            'capexsolar': 1600,
+            'capexsolar': 1491.64,
             'opexsolar': 0,
             'tilt': 'Latitude',
             'lifetimesolar': 25,
             'efficiencysolar': 0.8592,
             'maxcapsolar': 'None',
-            'capexelectric': 250,
+            'capexelectric': 347.69,
             'opexelectric': 0,
             'lifetimeelectric': 10,
             'efficiencyelectric': 0.8649,
@@ -380,7 +382,7 @@ async def run_output(session_data, request: Request):
 
     # Run model with input parameters
     task_callback(75, 'Running decision model...')
-    LCOE, solarCap, electricCap, electrolyzerCap, hydrogenCap, fuelcellCap, solarProduction, netPower, hydrogenStorageIn, hydrogenStorageOut, electricStorage, hydrogenStorage, demandData = await run_in_threadpool(get_output, demand_data, solar_availability_data, CapExGen, CapExStin, CapExSt, CapExStout, OpExGen, OpExStin, OpExStout, CostSlack, nin, nout, d, duration, MaxCapGen, MaxCapStin, MaxCapSt, MaxCapStout)
+    LCOE, solarCap, electricCap, electrolyzerCap, hydrogenCap, fuelcellCap, solarProduction, netPower, hydrogenStorageIn, hydrogenStorageOut, electricStorage, hydrogenStorage, demandData = await run_in_threadpool(get_output, demand_data, solar_availability_data, CapExGen, CapExStin, CapExSt, CapExStout, OpExGen, OpExStin, OpExStout, CostSlack, nin, nout, d, duration, MaxCapGen, MaxCapStin, MaxCapSt, MaxCapStout, gurobi=GUROBI)
 
     netSystemEfficiency = 100 * sum(netPower) / (sum(solarProduction) / session_data['efficiencysolar'])
     waterConsumption = sum(hydrogenStorageIn) * session_data['efficiencyelectrolyzer'] * 0.03 * (18.01528 / 2.016) * (1 / 0.7)

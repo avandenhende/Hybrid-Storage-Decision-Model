@@ -183,12 +183,12 @@ if __name__ == '__main__':
 
 # User manual FAQ and Acknowledgements
 # User manual licenses (and licenses file)
-# Updated mac version
-# Separate sections on plot screen, better headings
+# Updated mac version for ARM
+# Remove .env file in .app file
+# Enable mac copy to clipboard functionality
 
 
 
-# 
 # Ground services/facilities - 
 # UTV usage (min/max fuel usage per run, power output, etc.)
 # 
