@@ -182,17 +182,5 @@ if __name__ == '__main__':
 
 
 # User manual FAQ and Acknowledgements
-# User manual licenses (and licenses file)
+# User manual licenses
 # Updated mac version for ARM
-
-
-
-# Ground services/facilities - 
-# UTV usage (min/max fuel usage per run, power output, etc.)
-# 
-# Framework or UTV design and requirements
-
-# 
-# Fed ex truck hydrogen analogy
-#
-# Level 2 chargers maintenance

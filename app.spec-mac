@@ -9,8 +9,7 @@ a = Analysis(
     datas=[
         ('be/templates', 'be/templates'),
         ('be/static', 'be/static'),
-        ('.env', '.'),
-        ('.hscfg', '.')
+        ('.env', '.')
     ],
     hiddenimports=[],
     hookspath=['hooks'],
